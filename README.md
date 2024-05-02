@@ -4,6 +4,7 @@
 
 This project is made with HTML, CSS, vanilla javascript , vanilla PHP and bootstrap CSS.
 The purpose of this system is to track employees progress in regards to training. Training employees helps them to improve in their workplace.
+This is a part of learning PHP OOP and mysql, so it's more on backend focused and not front end.
 
 ## Pages
 
@@ -26,3 +27,7 @@ The purpose of this system is to track employees progress in regards to training
 ### Users
 
     - List of people who were assigned to take care of the system with two categories: admin and users
+
+## NOTE:
+
+- This is just a simple trainining management system,and can still be improved
