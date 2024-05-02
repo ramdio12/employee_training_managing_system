@@ -77,7 +77,8 @@ class TrainincConductModel
     JOIN 
        proctors p ON tp.proctor_id = p.proctor_id
     JOIN 
-        users u ON tp.user_id = u.user_id;";
+        users u ON tp.user_id = u.user_id
+        ORDER BY tp.training_date;";
         $stmt = $this->conn->prepare($sql);
         $stmt->execute();
         $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
