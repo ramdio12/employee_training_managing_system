@@ -12,33 +12,47 @@ $tcModel = new TrainincConductModel;
 $tcContr = new TrainingConductController;
 $empModel = new EmployeesModel;
 
+
 $method = $_SERVER['REQUEST_METHOD'];
-switch ($method) {
-    case 'GET':
-        $tname = Utilities::sanitizeInput($_GET["tname"]);
-        $date = Utilities::sanitizeInput($_GET["date"]);
-        $row = $tcModel->showTrainingDataByDate($tname, $date);
-        $participants = $tcModel->getParticipantsByTraining($_GET["tname"], $_GET["date"]);
-        $employees = $empModel->getAllEmployeesNames();
-        break;
+try {
+    switch ($method) {
+        case 'GET':
+            $tname = Utilities::sanitizeInput($_GET["tname"]);
+            $date = Utilities::sanitizeInput($_GET["date"]);
+            $row = $tcModel->showTrainingDataByDate($tname, $date);
+            $participants = $tcModel->getParticipantsByTraining($_GET["tname"], $_GET["date"]);
+            $employees = $empModel->getAllEmployeesNames();
+            break;
 
-    case 'POST':
-        $participantname = Utilities::sanitizeInput($_POST["participantname"]);
-        $trainingname = Utilities::sanitizeInput($_POST["trainingname"]);
-        $trainingdate = Utilities::sanitizeInput($_POST["trainingdate"]);
+        case 'POST':
+            $participantname = Utilities::sanitizeInput($_POST["participantname"]);
+            $trainingname = Utilities::sanitizeInput($_POST["trainingname"]);
+            $trainingdate = Utilities::sanitizeInput($_POST["trainingdate"]);
 
-        try {
-            $tcModel->insertParticipant($participantname, $trainingname, $trainingdate);
-            header("Location: showTraining.php?date={$trainingdate}&tname={$trainingname}");
-        } catch (PDOException $e) {
-            echo "Insert Failed " . $e->getMessage();
-        }
-        break;
+            try {
+                if ($tcModel->getParticipant($participantname, $trainingname, $trainingdate)) {
+                    header("Location: showTraining.php?date={$trainingdate}&tname={$trainingname}");
+                } else {
+                    $tcModel->insertParticipant($participantname, $trainingname, $trainingdate);
+                    header("Location: showTraining.php?date={$trainingdate}&tname={$trainingname}");
+                }
+            } catch (PDOException $e) {
+                echo "Insert Failed " . $e->getMessage();
+            }
+            break;
 
-    default:
-        # code...
-        break;
+        default:
+            # code...
+            break;
+    }
+} catch (PDOException $e) {
+    echo "Error: " . $e->getMessage();
 }
+
+
+
+
+
 
 ?>
 

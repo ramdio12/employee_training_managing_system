@@ -14,16 +14,17 @@ if ($_SERVER['REQUEST_METHOD'] === "POST") {
     $position = Utilities::sanitizeInput($_POST["position"]);
     $user_id = Utilities::sanitizeInput($_POST["user_id"]);
 
-    $emptyError = "";
+
     try {
-
+        $emptyError = "";
         if ($util->isEmpty($employeename) && $util->isEmpty($position)) {
-            $emptyErrors = "Please fill the empty fields";
-        }
-
-        if (empty($emptyError)) {
-            $employeeContr->createEmployee($employeename, $position, $user_id);
-            header("location: employees.php");
+            $emptyError = "Please fill the empty fields";
+            header("location: createEmployee.php");
+        } else {
+            if (empty($emptyError)) {
+                $employeeContr->createEmployee($employeename, $position, $user_id);
+                header("location: employees.php");
+            }
         }
     } catch (PDOException $e) {
         echo "Query failed " . $e->getMessage();
@@ -74,8 +75,8 @@ if ($_SERVER['REQUEST_METHOD'] === "POST") {
                 <button type="submit" class="btn btn-success">Submit</button>
             </div>
 
-            <?php if (isset($emptyErrors)) : ?>
-                <p><?= $emptyErrors; ?></p>
+            <?php if (isset($emptyError)) : ?>
+                <p><?= $emptyError; ?></p>
             <?php endif ?>
         </form>
     </div>

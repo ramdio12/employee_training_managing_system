@@ -70,7 +70,7 @@ switch ($method) {
                     <tr>
                         <td> <?php echo $row['employee_id']; ?></td>
                         <td>
-                            <a class="text-decoration-none fw-bold text-light link-danger" href="#">
+                            <a class="text-decoration-none fw-bold text-light link-danger" href="showParticipantData.php?name=<?= $row['employee_name']; ?>">
                                 <?php echo ucwords(htmlspecialchars($row['employee_name'])); ?>
                             </a>
                         </td>

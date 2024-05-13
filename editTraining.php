@@ -6,41 +6,45 @@ include 'Training/TrainingController.php';
 
 $trainingContr = new TrainingController;
 $utilContr = new Utilities;
-$method = $_SERVER['REQUEST_METHOD'];
 
+if (isset($_GET['id'])) {
+    $method = $_SERVER['REQUEST_METHOD'];
+    switch ($method) {
 
-switch ($method) {
-
-    case 'GET':
-        $id = Utilities::sanitizeInput($_GET['id']);
-        if (isset($id)) {
-            $result = $trainingContr->getTrainingDataById($id);
-        }
-        break;
-
-    case 'POST':
-
-
-        $trainingid = Utilities::sanitizeInput($_POST["training_id"]);
-        $trainingname = Utilities::sanitizeInput($_POST["trainingname"]);
-        $trainingtype = Utilities::sanitizeInput($_POST["trainingtype"]);
-
-        $emptyErrors = $numError = "";
-
-        try {
-            if ($utilContr->isEmpty($trainingname)) {
-                $emptyErrors = "Please fill the empty fields";
+        case 'GET':
+            $id = Utilities::sanitizeInput($_GET['id']);
+            if (isset($id)) {
+                $result = $trainingContr->getTrainingDataById($id);
             }
+            break;
 
-            if (empty($emptyErrors) && empty($numError)) {
-                $trainingContr->updateTrainingDataById($trainingid, $trainingname, $trainingtype);
-                header("location: trainings.php?message=editsuccess");
+        case 'POST':
+
+
+            $trainingid = Utilities::sanitizeInput($_POST["training_id"]);
+            $trainingname = Utilities::sanitizeInput($_POST["trainingname"]);
+            $trainingtype = Utilities::sanitizeInput($_POST["trainingtype"]);
+
+            $emptyErrors = $numError = "";
+
+            try {
+                if ($utilContr->isEmpty($trainingname)) {
+                    $emptyErrors = "Please fill the empty fields";
+                }
+
+                if (empty($emptyErrors) && empty($numError)) {
+                    $trainingContr->updateTrainingDataById($trainingid, $trainingname, $trainingtype);
+                    header("location: trainings.php?message=editsuccess");
+                }
+            } catch (PDOException $e) {
+                echo "Query failed " . $e->getMessage();
             }
-        } catch (PDOException $e) {
-            echo "Query failed " . $e->getMessage();
-        }
-        break;
+            break;
+    }
+} else {
+    header('Location: views/error.php?message=training_id_error');
 }
+
 
 
 ?>

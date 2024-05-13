@@ -12,37 +12,42 @@ $proctorModel = new ProctorModel;
 $proctorContr = new ProctorController;
 $util = new Utilities;
 
+if (isset($_GET['id'])) {
+    $method = $_SERVER['REQUEST_METHOD'];
+    switch ($method) {
+        case 'GET':
+            $id = Utilities::sanitizeInput($_GET["id"]);
+            $row = $proctorModel->getProctorData($id);
+            break;
+        case 'POST':
+            $id = Utilities::sanitizeInput($_POST["proctor_id"]);
+            $proctorname = Utilities::sanitizeInput($_POST["proctorname"]);
 
-$method = $_SERVER['REQUEST_METHOD'];
-switch ($method) {
-    case 'GET':
-        $id = Utilities::sanitizeInput($_GET["id"]);
-        $row = $proctorModel->getProctorData($id);
-        break;
-    case 'POST':
-        $id = Utilities::sanitizeInput($_POST["proctor_id"]);
-        $proctorname = Utilities::sanitizeInput($_POST["proctorname"]);
 
+            $emptyError = "";
+            try {
 
-        $emptyError = "";
-        try {
+                if ($util->isEmpty($proctorname)) {
+                    $emptyErrors = "Please fill the empty fields";
+                }
 
-            if ($util->isEmpty($proctorname)) {
-                $emptyErrors = "Please fill the empty fields";
+                if (empty($emptyError)) {
+                    $proctorContr->updateProctorDataById($id, $proctorname);
+                    header("location: proctors.php");
+                }
+            } catch (PDOException $e) {
+                echo "Query failed " . $e->getMessage();
             }
+            break;
 
-            if (empty($emptyError)) {
-                $proctorContr->updateProctorDataById($id, $proctorname);
-                header("location: proctors.php");
-            }
-        } catch (PDOException $e) {
-            echo "Query failed " . $e->getMessage();
-        }
-        break;
-
-    default:
-        break;
+        default:
+            break;
+    }
+} else {
+    header('Location: views/error.php?message=pro_id_error');
 }
+
+
 
 ?>
 

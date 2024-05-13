@@ -22,15 +22,19 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     try {
         if ($util->isEmpty($username) && $util->isEmpty($password) && $util->isEmpty($confirm_password)) {
             $emptyErrors = "Please fill all the fields!";
+            header('Location: registerUser.php');
         }
         if ($userContr->passwordError($password)) {
             $passwordError = "Password must have at least 8 characters with Uppercase,lowercase and special characters ";
+            header('Location: registerUser.php');
         }
         if ($password !== $confirm_password) {
             $confirm_passwordError = "Passwords does not matched!";
+            header('Location: registerUser.php');
         }
         if ($userCheck) {
             $usernameError = "Username is already taken";
+            header('Location: registerUser.php');
         }
 
 

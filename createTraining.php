@@ -19,12 +19,13 @@ if ($_SERVER['REQUEST_METHOD'] === "POST") {
     try {
 
         if ($util->isEmpty($trainingname)) {
+            header('createTraining.php');
             $emptyErrors = "Please fill the empty fields";
-        }
-
-        if (empty($emptyError)) {
-            $trainingContr->createTraining($trainingname, $trainingtype, $user_id);
-            header("location: trainings.php");
+        } else {
+            if (empty($emptyError)) {
+                $trainingContr->createTraining($trainingname, $trainingtype, $user_id);
+                header("location: trainings.php");
+            }
         }
     } catch (PDOException $e) {
         echo "Query failed " . $e->getMessage();

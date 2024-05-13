@@ -26,6 +26,7 @@ switch ($method) {
 
         try {
             $tcContr->createTrainingConduct($trainingname, $proctorname, $trainingdate, $userid);
+            header('Location: dashboard.php');
         } catch (PDOException $e) {
             echo "Insert error: " . $e->getMessage();
         }

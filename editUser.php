@@ -8,48 +8,53 @@ include 'User/UserController.php';
 
 $userContr = new UserController;
 $util = new Utilities;
-$method = $_SERVER['REQUEST_METHOD'];
 
+if (isset($_GET['id'])) {
+    $method = $_SERVER['REQUEST_METHOD'];
+    switch ($method) {
 
-switch ($method) {
-
-    case 'GET':
-        $id = Utilities::sanitizeInput($_GET['id']);
-        if (isset($id)) {
-            $result = $userContr->get_user_data($id);
-        }
-        break;
-
-    case 'POST':
-        $id = Utilities::sanitizeInput($_POST["id"]);
-        $username = Utilities::sanitizeInput($_POST["username"]);
-        $password = Utilities::sanitizeInput($_POST["password"]);
-        $role = Utilities::sanitizeInput($_POST["role"]);
-
-
-
-        $emptyErrors = $usernameError = $passwordError = "";
-
-        try {
-            if ($util->isEmpty($username) && $util->isEmpty($password) && $util->isEmpty($confirm_password)) {
-                $emptyErrors = "Please fill all the fields!";
+        case 'GET':
+            $id = Utilities::sanitizeInput($_GET['id']);
+            if (isset($id)) {
+                $result = $userContr->get_user_data($id);
             }
-            if ($userContr->passwordError($password)) {
-                $passwordError = "Password must have at least 8 characters with Uppercase,lowercase and special characters ";
+            break;
+
+        case 'POST':
+            $id = Utilities::sanitizeInput($_POST["id"]);
+            $username = Utilities::sanitizeInput($_POST["username"]);
+            $password = Utilities::sanitizeInput($_POST["password"]);
+            $role = Utilities::sanitizeInput($_POST["role"]);
+
+
+
+            $emptyErrors = $usernameError = $passwordError = "";
+
+            try {
+                if ($util->isEmpty($username) && $util->isEmpty($password) && $util->isEmpty($confirm_password)) {
+                    $emptyErrors = "Please fill all the fields!";
+                }
+                if ($userContr->passwordError($password)) {
+                    $passwordError = "Password must have at least 8 characters with Uppercase,lowercase and special characters ";
+                }
+
+
+
+                if (empty($emptyErrors) && empty($usernameError) && empty($passwordError)) {
+                    $userContr->update_user($id, $username, $role, $password);
+                    header("location: users.php?message=success");
+                }
+            } catch (PDOException $e) {
+                echo "Update Error" . $e->getMessage();
             }
 
-
-
-            if (empty($emptyErrors) && empty($usernameError) && empty($passwordError)) {
-                $userContr->update_user($id, $username, $role, $password);
-                header("location: users.php?message=success");
-            }
-        } catch (PDOException $e) {
-            echo "Update Error" . $e->getMessage();
-        }
-
-        break;
+            break;
+    }
+} else {
+    header('Location: views/error.php?message=user_id_error');
 }
+
+
 
 
 

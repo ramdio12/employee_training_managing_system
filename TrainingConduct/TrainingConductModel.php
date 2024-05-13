@@ -116,7 +116,51 @@ class TrainincConductModel
 
 
 
+    public function getParticipantByName(string $name)
+    {
+        $sql = "SELECT
+        t.training_name,
+        p.training_date
+    FROM 
+        trainings t
+    JOIN 
+        participant p ON t.training_id = p.training_id
+    JOIN 
+        employees e ON p.employee_id = e.employee_id
+    WHERE 
+        e.employee_name = :employeename";
 
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindParam(':employeename', $name);
+        $stmt->execute();
+        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $result;
+    }
+
+    // to avoid duplication, we will check the participant's name on the participant's table
+    // if it is already joined on a training on a specific date, then there will be no action 
+    public function getParticipant(string $employeename, string $trainingname, string $trainingdate)
+    {
+        $sql = "SELECT
+        e.employee_name
+    FROM 
+        employees e
+    JOIN 
+        participant p ON e.employee_id = p.employee_id
+    JOIN 
+        trainings t ON p.training_id = t.training_id
+    WHERE 
+        e.employee_name = :employeename
+        AND t.training_name = :trainingname AND p.training_date = :trainingdate";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindParam(':employeename', $employeename);
+        $stmt->bindParam(':trainingname', $trainingname);
+        $stmt->bindParam(':trainingdate', $trainingdate);
+        $stmt->execute();
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result;
+    }
 
 
 
@@ -147,6 +191,8 @@ class TrainincConductModel
     }
 
 
+
+
     // JUST A SAMPLE QUERY , FOR PRACTICE PURPOSES
     public function showAllEmployeesById(int $id)
     {
@@ -166,6 +212,8 @@ class TrainincConductModel
         $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
         return $result;
     }
+
+
 
 
 

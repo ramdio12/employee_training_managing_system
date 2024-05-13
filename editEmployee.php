@@ -12,37 +12,44 @@ $employeesModel = new EmployeesModel;
 $employeesContr = new EmployeesController;
 $util = new Utilities;
 
+if (isset($_GET['id'])) {
+    $method = $_SERVER['REQUEST_METHOD'];
+    switch ($method) {
+        case 'GET':
+            $id = Utilities::sanitizeInput($_GET["id"]);
+            $row = $employeesModel->getEmployeeData($id);
+            break;
+        case 'POST':
+            $id = Utilities::sanitizeInput($_POST["employee_id"]);
+            $employeename = Utilities::sanitizeInput($_POST["name"]);
+            $position = Utilities::sanitizeInput($_POST["position"]);
 
-$method = $_SERVER['REQUEST_METHOD'];
-switch ($method) {
-    case 'GET':
-        $id = Utilities::sanitizeInput($_GET["id"]);
-        $row = $employeesModel->getEmployeeData($id);
-        break;
-    case 'POST':
-        $id = Utilities::sanitizeInput($_POST["employee_id"]);
-        $employeename = Utilities::sanitizeInput($_POST["name"]);
-        $position = Utilities::sanitizeInput($_POST["position"]);
+            $emptyError = "";
+            try {
 
-        $emptyError = "";
-        try {
+                if ($util->isEmpty($employeename) && $util->isEmpty($position)) {
+                    $emptyErrors = "Please fill the empty fields";
+                }
 
-            if ($util->isEmpty($employeename) && $util->isEmpty($position)) {
-                $emptyErrors = "Please fill the empty fields";
+                if (empty($emptyError)) {
+                    $employeesContr->updateEmployeeById($id, $employeename, $position);
+                    header("location: employees.php");
+                }
+            } catch (PDOException $e) {
+                echo "Query failed " . $e->getMessage();
             }
+            break;
 
-            if (empty($emptyError)) {
-                $employeesContr->updateEmployeeById($id, $employeename, $position);
-                header("location: employees.php");
-            }
-        } catch (PDOException $e) {
-            echo "Query failed " . $e->getMessage();
-        }
-        break;
-
-    default:
-        break;
+        default:
+            break;
+    }
+} else {
+    header('Location: views/error.php?message=emp_id_error');
 }
+
+
+
+
 
 ?>
 

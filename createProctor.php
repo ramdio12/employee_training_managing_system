@@ -16,11 +16,12 @@ if ($_SERVER['REQUEST_METHOD'] === "POST") {
     $proctorname = Utilities::sanitizeInput($_POST["proctorname"]);
     $user_id = Utilities::sanitizeInput($_POST["user_id"]);
 
-    $emptyError = "";
+
     try {
 
         if ($util->isEmpty($proctorname)) {
-            $emptyErrors = "Please fill the empty fields";
+            header("location: createProctor.php");
+            $emptyError = "Please fill the empty fields";
         }
 
         if (empty($emptyError)) {
@@ -60,8 +61,8 @@ if ($_SERVER['REQUEST_METHOD'] === "POST") {
                 <button type="submit" class="btn btn-success">Submit</button>
             </div>
 
-            <?php if (isset($emptyErrors)) : ?>
-                <p><?= $emptyErrors; ?></p>
+            <?php if (isset($emptyError)) : ?>
+                <p><?= $emptyError; ?></p>
             <?php endif ?>
         </form>
     </div>
