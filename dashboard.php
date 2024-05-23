@@ -39,7 +39,7 @@ $rows = $tcModel->getAllTrainingConduct();
                     <tr>
 
                         <td>
-                            <a class="text-decoration-none fs-6 text-white fw-bold linkhover" href="showTraining.php?date=<?= $row['training_date']; ?>&tname=<?= $row['training_name']; ?>">
+                            <a class="text-decoration-none fs-6 text-white fw-bold linkhover" href="showTraining.php?id=<?= $row['tc_id'] ?>">
                                 <?= ucwords(htmlspecialchars($row['training_name'])); ?>
                             </a>
                         </td>

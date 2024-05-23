@@ -1,10 +1,7 @@
 <?php
-
 /*
       MODEL IS USED FOR COMMUNICATING WITH DATABASE
     */
-
-
 require_once 'Database/DatabaseConnect.php';
 
 
@@ -21,7 +18,7 @@ class TrainincConductModel
     // INSERT TRAINING NAME WITH PROCTOR AND THE TRAINING DATE
     public function insertTrainingConduct(string $trainingname, string $proctorname, string $trainingdate, $user_id,)
     {
-        $sql = "INSERT INTO training_conduct (training_id, proctor_id,training_date,user_id)
+        $sql = "INSERT INTO training_proctor (training_id, proctor_id,training_date,user_id)
         VALUES (
             (SELECT training_id FROM trainings WHERE training_name = :trainingname),
             (SELECT proctor_id FROM proctors WHERE proctor_name = :proctorname),
@@ -38,32 +35,28 @@ class TrainincConductModel
     }
 
     // INSERT PARTCIPANT IN A TRAINING WITH TRAINING DATE
-    public function insertParticipant(string $employeename, string $tc_id, $user_id)
+    public function insertParticipant(string $employeename, string $trainingname, $trainingdate)
     {
-        $sql = "INSERT INTO participant (employee_id,tc_id,user_id)
+        $sql = "INSERT INTO participant (employee_id,training_id,training_date)
         VALUES (
             (SELECT employee_id FROM employees WHERE employee_name = :employeename),
-            (SELECT tc_id FROM training_conduct WHERE tc_id = :tc_id),
-            (SELECT user_id FROM users WHERE user_id = :user_id)
+            (SELECT training_id FROM trainings WHERE training_name = :trainingname),
+            :training_date
         )";
         $stmt = $this->conn->prepare($sql);
         $stmt->bindParam(':employeename', $employeename);
-        $stmt->bindParam(':tc_id', $tc_id);
-        $stmt->bindParam(':user_id', $user_id);
+        $stmt->bindParam(':trainingname', $trainingname);
+        $stmt->bindParam(':training_date', $trainingdate);
         $stmt->execute();
     }
 
-    // GET ALL PARTICIPANTS BY id
-    public function getAllParticipantsById(int $tc_id)
+    // GET ALL PARTICIPANTS BY TRAINING NAME AND TRAINING DATE
+    public function getParticipantsByTraining(string $trainingname, $trainingdate)
     {
-        $sql = "SELECT e.employee_name AS participant_name, tc.tc_id 
-        FROM participant pa  
-        JOIN employees e ON pa.employee_id = e.employee_id 
-        JOIN training_conduct tc ON pa.tc_id = tc.tc_id
-        WHERE tc.tc_id=:tc_id;";
-
+        $sql = "SELECT e.employee_name AS participant_name FROM participant pa JOIN trainings t ON pa.training_id = t.training_id JOIN training_proctor tp ON t.training_id = tp.training_id JOIN employees e ON pa.employee_id = e.employee_id WHERE t.training_name = :trainingname AND tp.training_date = :trainingdate AND pa.training_date = :trainingdate;";
         $stmt = $this->conn->prepare($sql);
-        $stmt->bindParam(':tc_id', $tc_id);
+        $stmt->bindParam(':trainingname', $trainingname);
+        $stmt->bindParam(':trainingdate', $trainingdate);
         $stmt->execute();
         $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
         return $result;
@@ -74,20 +67,18 @@ class TrainincConductModel
     {
         $sql = "SELECT 
         t.training_name,
-        tc.tc_id,
-        tc.training_date,
+        tp.training_date,
         p.proctor_name,
-        u.user_name
-        FROM 
-            trainings t
-        JOIN 
-            training_conduct tc ON t.training_id = tc.training_id
-        JOIN 
-            proctors p ON tc.proctor_id = p.proctor_id
-        JOIN 
-            users u ON tc.user_id = u.user_id
-        ORDER BY 
-            tc.training_date;";
+       u.user_name
+    FROM 
+        trainings t
+    JOIN 
+        training_proctor tp ON t.training_id = tp.training_id
+    JOIN 
+       proctors p ON tp.proctor_id = p.proctor_id
+    JOIN 
+        users u ON tp.user_id = u.user_id
+        ORDER BY tp.training_date;";
         $stmt = $this->conn->prepare($sql);
         $stmt->execute();
         $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -96,27 +87,28 @@ class TrainincConductModel
 
 
     // SHOW INFORMATION OF TRAINING CONDUCTED IN A SPECIFIC DATE
-    public function showTrainingDataByDate($tc_id)
+    public function showTrainingDataByDate($trainingname, $trainingdate)
     {
         $sql = "SELECT
             t.training_name,
-            tc.tc_id,
-            tc.training_date,
+            tp.training_date,
             p.proctor_name,
             u.user_name
         FROM 
             trainings t
         JOIN 
-            training_conduct tc ON t.training_id = tc.training_id
+            training_proctor tp ON t.training_id = tp.training_id
         JOIN 
-           proctors p ON tc.proctor_id = p.proctor_id
+           proctors p ON tp.proctor_id = p.proctor_id
         JOIN 
-            users u ON tc.user_id = u.user_id 
+            users u ON tp.user_id = u.user_id 
         WHERE 
-        tc.tc_id = :tc_id";
+        t.training_name = :trainingname
+    AND tp.training_date = :trainingdate";
 
         $stmt = $this->conn->prepare($sql);
-        $stmt->bindParam(':tc_id', $tc_id);
+        $stmt->bindParam(':trainingdate', $trainingdate);
+        $stmt->bindParam(':trainingname', $trainingname);
         $stmt->execute();
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
         return $result;
@@ -126,8 +118,17 @@ class TrainincConductModel
 
     public function getParticipantByName(string $name)
     {
-        $sql = "SELECT t.training_name, tc.training_date FROM trainings t JOIN training_conduct tc ON t.training_id = tc.training_id JOIN participant p ON tc.tc_id = p.tc_id JOIN employees e ON p.employee_id = e.employee_id WHERE e.employee_name = :employeename;";
-
+        $sql = "SELECT
+        t.training_name,
+        p.training_date
+    FROM 
+        trainings t
+    JOIN 
+        participant p ON t.training_id = p.training_id
+    JOIN 
+        employees e ON p.employee_id = e.employee_id
+    WHERE 
+        e.employee_name = :employeename";
 
         $stmt = $this->conn->prepare($sql);
         $stmt->bindParam(':employeename', $name);
@@ -138,7 +139,7 @@ class TrainincConductModel
 
     // to avoid duplication, we will check the participant's name on the participant's table
     // if it is already joined on a training on a specific date, then there will be no action 
-    public function getParticipant(string $employeename, int $tc_id)
+    public function getParticipant(string $employeename, string $trainingname, string $trainingdate)
     {
         $sql = "SELECT
         e.employee_name
@@ -147,14 +148,15 @@ class TrainincConductModel
     JOIN 
         participant p ON e.employee_id = p.employee_id
     JOIN 
-        training_conduct tc ON p.tc_id = tc.tc_id
+        trainings t ON p.training_id = t.training_id
     WHERE 
         e.employee_name = :employeename
-        AND tc.tc_id = :tc_id";
+        AND t.training_name = :trainingname AND p.training_date = :trainingdate";
 
         $stmt = $this->conn->prepare($sql);
         $stmt->bindParam(':employeename', $employeename);
-        $stmt->bindParam(':tc_id', $tc_id);
+        $stmt->bindParam(':trainingname', $trainingname);
+        $stmt->bindParam(':trainingdate', $trainingdate);
         $stmt->execute();
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
         return $result;

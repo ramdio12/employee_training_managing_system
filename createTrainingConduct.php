@@ -79,7 +79,7 @@ switch ($method) {
 
             <div class="mb-3">
                 <label for="trainingdate" class="form-label ">Training Date</label>
-                <input class="w-25 form-control" type="date" name="trainingdate" id="trainingdate">
+                <input class="w-25 form-control" type="date" name="trainingdate" id="trainingdate" required>
             </div>
             <input type="hidden" value="<?php echo $_SESSION['user_id'] ?>" name="user_id">
 

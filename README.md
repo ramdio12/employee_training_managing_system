@@ -31,3 +31,7 @@ This is a part of learning PHP OOP and mysql, so it's more on backend focused an
 ## NOTE:
 
 - This is just a simple trainining management system,and can still be improved
+
+# DATABASE DESIGN
+
+![Alt text](/assets/etms.png)<br>
